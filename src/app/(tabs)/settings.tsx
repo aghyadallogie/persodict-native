@@ -10,7 +10,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  View,
+  View
 } from 'react-native';
 
 export default function SettingsScreen() {
@@ -74,19 +74,35 @@ export default function SettingsScreen() {
           </Text>
         )}
 
-        <Pressable
-          style={[styles.logoutButton, { borderColor: colors.border }]}
-          onPress={handleLogout}
+        {/* Log out section */}
+        <Text style={[styles.sectionLabel, { color: colors.textMuted }]}>Account</Text>
+        <View
+          style={[
+            styles.card,
+            { borderColor: colors.border, boxShadow: `0px 2px 8px ${colors.shadow}` },
+          ]}
         >
-          <Text style={styles.logoutText}>Log Out</Text>
-        </Pressable>
+          <Pressable
+            onPress={handleLogout}
+            style={({ pressed }) => [
+              styles.row,
+              pressed && { opacity: 0.7 },
+            ]}
+          >
+            <Text style={[styles.logoutText, { color: colors.text }]}>Log Out</Text>
+          </Pressable>
+        </View>
       </ScrollView>
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  scroll: { paddingBottom: 32 },
+  scroll: {
+    paddingBottom: 32,
+    justifyContent: 'space-between',
+    flexGrow: 1,
+  },
   title: {
     fontSize: 20,
     fontWeight: '600',
@@ -106,13 +122,36 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 16,
   },
-  logoutButton: {
-    borderWidth: 1,
-    borderRadius: 8,
-    padding: 16,
-    alignItems: 'center',
-    marginTop: 40,
-    marginBottom: 24,
+  section: {
+    marginTop: 32,
+    paddingTop: 24,
+    borderTopWidth: 1,
   },
-  logoutText: { color: '#DC2626', fontSize: 16, fontWeight: '600' },
+  sectionLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+    marginTop: 32,
+    paddingHorizontal: 12,
+  },
+  card: {
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    marginHorizontal: 8,
+    backgroundColor: 'transparent',
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 14,
+  },
+  rowLeft: { gap: 2 },
+  rowLabel: { fontSize: 16, fontWeight: '500' },
+  rowHint: { fontSize: 12 },
+  logoutText: {
+    fontSize: 16, fontWeight: '600',
+  },
 });

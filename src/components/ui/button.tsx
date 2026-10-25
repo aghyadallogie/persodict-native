@@ -36,7 +36,7 @@ export function Button({
         {
           width,
           borderColor: colors.border,
-          boxShadow: `1px 3px 10px ${colors.shadow}`,
+          boxShadow: `2px 4px 8px ${colors.shadow}`,
         },
         pressed && styles.pressed,
         disabled && styles.disabled,
@@ -64,7 +64,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 12,
     paddingHorizontal: 16,
-    paddingVertical: 16,
+    paddingVertical: 13,
   },
   pressed: { opacity: 0.85 },
   disabled: { opacity: 0.5 },

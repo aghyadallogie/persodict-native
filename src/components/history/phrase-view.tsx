@@ -89,7 +89,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         gap: 12,
-        paddingVertical: 8,
+        paddingVertical: 6,
     },
     flag: { fontSize: 20 },
     text: { fontSize: 16, flex: 1, textAlign: 'right', paddingRight: 4 },

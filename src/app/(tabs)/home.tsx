@@ -69,7 +69,7 @@ export default function HomeScreen() {
                 {
                   borderColor: colors.border,
                   color: colors.text,
-                  boxShadow: `0px 2px 8px ${colors.shadow}`,
+                  boxShadow: `0px -2px -8px ${colors.shadow}`,
                   borderTopColor: colors.shadow,
                   borderLeftColor: colors.shadow,
                   borderRightColor: colors.border,
@@ -88,9 +88,9 @@ export default function HomeScreen() {
               disabled={!canSubmit}
             >
               {isLoading ? (
-                <ActivityIndicator color="#fff" />
+                <ActivityIndicator color={colors.text} />
               ) : (
-                <Ionicons name="language" size={22} color="#fff" />
+                <Ionicons name="language" size={24} color={colors.text} />
               )}
             </Button>
           </View>
@@ -128,7 +128,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 10,
     paddingVertical: 15,
-    paddingHorizontal: 16,
+    paddingHorizontal: 12,
     fontSize: 16,
   },
   error: {
