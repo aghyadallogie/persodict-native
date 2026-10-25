@@ -17,7 +17,7 @@ export const Colors = {
         inputShadow: 'rgba(228, 224, 224, 0.44)',
         text: '#F5F5F592',
         textMuted: '#9CA3AF77',
-        primary: '#60A5FA',
+        primary: 'rgba(161, 139, 94, 0.99)',
         border: 'rgb(99, 99, 99, 0.16)',
         shadow: 'rgb(0, 0, 0, 0.9)',
     },

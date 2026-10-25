@@ -1,7 +1,7 @@
 // ISO 639-1 language code → emoji flag
 const FLAGS: Record<string, string> = {
     en: '🇬🇧',
-    ar: '🇸🇦',
+    ar: '🇵🇸',
     fr: '🇫🇷',
     es: '🇪🇸',
     de: '🇩🇪',
@@ -16,8 +16,11 @@ const FLAGS: Record<string, string> = {
     sv: '🇸🇪',
     pl: '🇵🇱',
     hi: '🇮🇳',
+    bg: '🇧🇬',
+    hu: '🇭🇺',
+    el: '🇬🇷',
 };
 
 export function flagFor(lang: string): string {
-    return FLAGS[lang.toLowerCase()] ?? '🏳️';
+    return FLAGS[lang.toLowerCase()] ?? lang.toUpperCase();
 }

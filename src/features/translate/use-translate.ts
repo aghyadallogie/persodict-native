@@ -5,6 +5,7 @@ import * as SecureStore from 'expo-secure-store';
 import { useCallback, useState } from 'react';
 import { useSWRConfig } from 'swr';
 import useSWRMutation from 'swr/mutation';
+import { useSettings } from '../settings/use-settings';
 
 const SESSION_KEY = 'persodict_session';
 
@@ -60,9 +61,15 @@ export function useSubmitTranslate() {
     }
   );
 
+  const { userLangs } = useSettings();
+
   const handleSubmit = useCallback(
     async (text: string) => {
       if (!session) return signOut();
+      if (!userLangs.length) {
+        setError('Please select at least one language');
+        return;
+      }
 
       setError(null);
       setResult(null);
@@ -78,7 +85,7 @@ export function useSubmitTranslate() {
         setError('Translation failed. Please try again.');
       }
     },
-    [trigger, session, signOut]
+    [trigger, session, signOut, userLangs]
   );
 
   const clearResult = useCallback(() => {

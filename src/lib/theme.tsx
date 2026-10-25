@@ -1,5 +1,4 @@
-// src/lib/theme.tsx
-import { Colors } from '@/constants/theme'; // Your existing colors
+import { Colors } from '@/constants/theme';
 import { createContext, ReactNode, useContext } from 'react';
 import { useColorScheme } from 'react-native';
 
