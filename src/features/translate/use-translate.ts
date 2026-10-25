@@ -62,15 +62,13 @@ export function useSubmitTranslate() {
 
   const handleSubmit = useCallback(
     async (text: string) => {
-      const trimmed = text.trim();
-      if (!trimmed) return;
       if (!session) return signOut();
 
       setError(null);
       setResult(null);
 
       try {
-        await trigger({ text: trimmed });
+        await trigger({ text });
       } catch (e) {
         console.error('[translate] trigger threw:', e);
         if (e instanceof AuthError) {

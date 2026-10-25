@@ -1,4 +1,5 @@
 import { TranslatedPhrase } from '@/components/translate/translated-phrase';
+import { Button } from '@/components/ui/button';
 import { Screen } from '@/components/ui/screen';
 import { historyRepository } from '@/features/history';
 import { useSubmitTranslate } from '@/features/translate/use-translate';
@@ -9,12 +10,11 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
-  Pressable,
   ScrollView,
   StyleSheet,
   Text,
   TextInput,
-  View,
+  View
 } from 'react-native';
 import useSWR from 'swr';
 
@@ -23,14 +23,21 @@ export default function HomeScreen() {
   const { handleSubmit, isLoading, error, result, clearResult } = useSubmitTranslate();
   const [text, setText] = useState('');
 
-  const { data: phrases, isValidating } = useSWR('phrases', () => historyRepository.listHistory());
+  const { data: phrases, isLoading: phrasesLoading } = useSWR('phrases', () =>
+    historyRepository.listHistory()
+  );
+
+  const ordered = phrases ? [...phrases].reverse() : [];
+  const latest = ordered[0] ?? null;
+  const shown = result ?? latest;
+  const canSubmit = text.trim().length > 0 && !isLoading;
 
   useEffect(() => {
-    if (!result || !phrases || isValidating) return;
+    if (phrasesLoading || !phrases || !result) return;
     if (!phrases.some((p) => p.id === result.id)) {
       clearResult();
     }
-  }, [phrases, result, isValidating, clearResult]);
+  }, [phrases, phrasesLoading, result, clearResult]);
 
   const onSubmit = async () => {
     if (!text.trim() || isLoading) return;
@@ -38,26 +45,24 @@ export default function HomeScreen() {
     setText('');
   };
 
-  const canSubmit = text.trim().length > 0 && !isLoading;
-
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      style={{ flex: 1, backgroundColor: colors.background }}
+      style={{ flex: 1 }}
     >
       <Screen>
         <ScrollView
           keyboardShouldPersistTaps="handled"
-          contentContainerStyle={{ paddingBottom: 32 }}
+          contentContainerStyle={{ paddingBottom: 32, paddingHorizontal: 12 }}
         >
           <View style={styles.form}>
             <TextInput
               value={text}
               onChangeText={(t) => {
                 setText(t);
-                if (result || error) clearResult();
+                if (error) clearResult();
               }}
-              placeholder="Word to translate"
+              placeholder="Text to translate"
               placeholderTextColor={colors.textMuted}
               style={[
                 styles.input,
@@ -65,6 +70,11 @@ export default function HomeScreen() {
                   borderColor: colors.border,
                   color: colors.text,
                   boxShadow: `0px 2px 8px ${colors.shadow}`,
+                  borderTopColor: colors.shadow,
+                  borderLeftColor: colors.shadow,
+                  borderRightColor: colors.border,
+                  borderBottomColor: colors.border,
+                  backgroundColor: colors.inputBackground,
                 },
               ]}
               editable={!isLoading}
@@ -73,20 +83,16 @@ export default function HomeScreen() {
               autoCapitalize="none"
               autoCorrect={false}
             />
-            <Pressable
+            <Button
               onPress={onSubmit}
               disabled={!canSubmit}
-              style={[
-                styles.button,
-                { backgroundColor: colors.primary, opacity: canSubmit ? 1 : 0.5 },
-              ]}
             >
               {isLoading ? (
                 <ActivityIndicator color="#fff" />
               ) : (
                 <Ionicons name="language" size={22} color="#fff" />
               )}
-            </Pressable>
+            </Button>
           </View>
 
           {error && (
@@ -95,7 +101,15 @@ export default function HomeScreen() {
             </Text>
           )}
 
-          {result && <TranslatedPhrase phrase={result} />}
+          {shown && (
+            <TranslatedPhrase phrase={shown} />
+          )}
+
+          {!shown && phrases && phrases.length === 0 && (
+            <Text>
+              Translate something to get started.
+            </Text>
+          )}
         </ScrollView>
       </Screen>
     </KeyboardAvoidingView>
@@ -117,17 +131,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     fontSize: 16,
   },
-  button: {
-    width: 52,
-    height: 52,
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   error: {
     color: '#DC2626',
     fontSize: 13,
     textAlign: 'center',
     marginTop: 12,
+  },
+  sectionLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+    textAlign: 'center',
+    marginTop: 24,
+    marginBottom: 8,
   },
 });

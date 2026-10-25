@@ -1,6 +1,5 @@
-// src/app/(tabs)/_layout.tsx
 import { useTheme } from '@/lib/theme';
-import { Ionicons } from '@expo/vector-icons'; // Assuming you have this installed
+import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 
 export default function TabLayout() {
@@ -9,11 +8,11 @@ export default function TabLayout() {
     return (
         <Tabs
             screenOptions={{
-                headerShown: true, // Native headers shown on tab roots
+                headerShown: false,
                 headerStyle: { backgroundColor: colors.background },
                 headerTintColor: colors.text,
                 tabBarStyle: { backgroundColor: colors.background },
-                tabBarActiveTintColor: colors.primary, // Adjust based on your Colors object
+                tabBarActiveTintColor: colors.primary,
                 tabBarInactiveTintColor: colors.textMuted,
             }}
         >

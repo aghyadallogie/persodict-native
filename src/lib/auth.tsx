@@ -5,6 +5,7 @@ import {
     useCallback,
     useContext,
     useEffect,
+    useMemo,
     useState,
 } from 'react';
 
@@ -18,8 +19,8 @@ type AuthContextType = {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const SESSION_KEY = 'persodict_session';
+const LOGIN_TIMEOUT_MS = 15_000;
 
-// Matches AuthResult from the NestJS AuthService
 type AuthResult = { id: string; email: string; token: string };
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -27,41 +28,66 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
+        let cancelled = false;
         SecureStore.getItemAsync(SESSION_KEY)
-            .then((token) => setSession(token))
-            .finally(() => setIsLoading(false));
+            .then((token) => !cancelled && setSession(token))
+            .catch(() => { })
+            .finally(() => !cancelled && setIsLoading(false));
+        return () => {
+            cancelled = true;
+        };
     }, []);
 
     const signIn = useCallback(async (email: string, password: string) => {
-        const res = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/auth/login`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password }),
-        });
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), LOGIN_TIMEOUT_MS);
 
-        if (!res.ok) {
-            if (res.status === 401) throw new Error('Invalid email or password');
-            throw new Error(`Login failed (${res.status})`);
+        try {
+            let res: Response;
+            try {
+                res = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: email.trim(), password }),
+                    signal: controller.signal,
+                });
+            } catch {
+                throw new Error(
+                    controller.signal.aborted
+                        ? 'Request timed out. Please try again.'
+                        : 'Network error. Check your connection.',
+                );
+            }
+
+            if (!res.ok) {
+                if (res.status === 401) throw new Error('Invalid email or password');
+                throw new Error(`Login failed (${res.status})`);
+            }
+
+            const body = (await res.json().catch(() => null)) as AuthResult | null;
+            if (!body?.token) throw new Error('Login response did not contain a token');
+
+            await SecureStore.setItemAsync(SESSION_KEY, body.token);
+            setSession(body.token);
+        } finally {
+            clearTimeout(timer);
         }
-
-        const body = (await res.json()) as AuthResult;
-
-        if (!body?.token) throw new Error('Login response did not contain a token');
-
-        await SecureStore.setItemAsync(SESSION_KEY, body.token);
-        setSession(body.token);
     }, []);
 
     const signOut = useCallback(async () => {
-        await SecureStore.deleteItemAsync(SESSION_KEY);
-        setSession(null);
+        try {
+            await SecureStore.deleteItemAsync(SESSION_KEY);
+        } finally {
+            setSession(null);
+        }
     }, []);
 
-    return (
-        <AuthContext.Provider value={{ session, isLoading, signIn, signOut }}>
-            {children}
-        </AuthContext.Provider>
+    const value = useMemo(
+        () => ({ session, isLoading, signIn, signOut }),
+        [session, isLoading, signIn, signOut],
     );
+
+    return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {
