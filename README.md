@@ -1,56 +1,46 @@
-# Welcome to your Expo app 👋
+# Persodict — Mobile
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A React Native (Expo) client for Persodict, a personal translation dictionary.
+Translations are created on the device and synced with a NestJS backend.
 
-## Get started
+## Stack
 
-1. Install dependencies
+- **Expo SDK 57** (React Native, Expo Router)
+- **TypeScript**
+- **SWR** — server state, caching, revalidation
+- **expo-secure-store** — JWT persistence
+- **@react-native-async-storage/async-storage** — theme preference
+- **NestJS + PostgreSQL backend** — deployed at `https://persodict-be.vercel.app/api`
 
-   ```bash
-   npm install
-   ```
+## Features
 
-2. Start the app
+- Email/password authentication (JWT stored in SecureStore)
+- Translate a word into the user's selected languages, saved server-side
+- History of all past translations, with delete (swipe or tap)
+- Language selection (15 languages) with per-flag optimistic toggle
+- Light / dark theme toggle, persisted on device
+- Auth-gated navigation via Expo Router's `Stack.Protected`
 
-   ```bash
-   npx expo start
-   ```
+## Getting Started
 
-In the output, you'll find options to open the app in a
+### Prerequisites
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+- Node.js 20+
+- Expo Go installed on your phone (SDK 57 build — from [expo.dev/go](https://expo.dev/go))
+- A running instance of the backend, or access to the deployed one
 
-You can start developing by editing the files inside the **src/app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+### Install
 
 ```bash
-npm run reset-project
-```
+npm install
 
-This command will move the starter code to the **example** directory and create a blank **src/app** directory where you can start developing.
 
-### Other setup steps
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+### 📌 A few notes on the content
 
-## Learn more
+- **The "Roadmap" section is intentional.** It documents where the app is heading (local-first sync), which is useful context for anyone reviewing the repo — and it keeps the "cache-first" promise visible rather than buried in commit history.
+- **The "Architecture Notes" section is the most valuable part.** It explains *why* the repository pattern exists, which prevents a future contributor (or you in three months) from bypassing it and calling `fetch` directly from a screen.
+- **The backend endpoint table** is accurate to what we've confirmed from the Swagger and controllers. If the backend gains endpoints later, this is the place to update.
+- **The `Do not use localhost` warning** is there because it's the single most common RN + local backend mistake — and it cost time earlier in this project.
 
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+Trim any sections that don't apply (e.g., if you'd rather not commit the Roadmap publicly, drop it). Otherwise this is ready to drop at the repo root as `README.md`.

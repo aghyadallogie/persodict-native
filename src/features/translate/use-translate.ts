@@ -48,12 +48,12 @@ export function useSubmitTranslate() {
     translateRequest,
     {
       onSuccess: async (data) => {
-        setResult(data);
         try {
           await mutate('phrases');
         } catch (e) {
           console.warn('[translate] mutate phrases failed:', e);
         }
+        setResult(data);
       },
       onError: (e) => {
         console.error('[translate] onError:', e);

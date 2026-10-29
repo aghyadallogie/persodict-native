@@ -1,3 +1,6 @@
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Logo } from '@/components/ui/logo';
 import { useAuth } from '@/lib/auth';
 import { useTheme } from '@/lib/theme';
 import { useState } from 'react';
@@ -5,10 +8,9 @@ import {
     ActivityIndicator,
     KeyboardAvoidingView,
     Platform,
-    Pressable,
     StyleSheet,
     Text,
-    TextInput
+    View,
 } from 'react-native';
 
 export default function LoginScreen() {
@@ -38,27 +40,29 @@ export default function LoginScreen() {
             behavior={Platform.OS === 'ios' ? 'padding' : undefined}
             style={[styles.container, { backgroundColor: colors.background }]}
         >
+            <View style={styles.logo}>
+                <Logo size={96} />
+            </View>
+
             <Text style={[styles.title, { color: colors.text }]}>Persodict</Text>
 
-            <TextInput
+            <Input
                 placeholder="Email"
-                placeholderTextColor={colors.textMuted}
                 value={email}
                 onChangeText={setEmail}
-                style={[styles.input, { borderColor: colors.border, color: colors.text }]}
+                style={styles.input}
                 autoCapitalize="none"
                 autoCorrect={false}
                 keyboardType="email-address"
                 textContentType="emailAddress"
             />
 
-            <TextInput
+            <Input
                 placeholder="Password"
-                placeholderTextColor={colors.textMuted}
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry
-                style={[styles.input, { borderColor: colors.border, color: colors.text }]}
+                style={styles.input}
                 textContentType="password"
                 onSubmitEditing={canSubmit ? handleLogin : undefined}
             />
@@ -69,29 +73,23 @@ export default function LoginScreen() {
                 </Text>
             )}
 
-            <Pressable
+            <Button
                 disabled={!canSubmit}
                 onPress={handleLogin}
-                style={[
-                    styles.button,
-                    { backgroundColor: colors.primary, opacity: canSubmit ? 1 : 0.5 },
-                ]}
+                style={styles.button}
+                accessibilityLabel="Log in"
             >
-                {submitting ? (
-                    <ActivityIndicator color="#fff" />
-                ) : (
-                    <Text style={styles.buttonText}>Log In</Text>
-                )}
-            </Pressable>
+                {submitting ? <ActivityIndicator color={colors.primary} /> : 'Log In'}
+            </Button>
         </KeyboardAvoidingView>
     );
 }
 
 const styles = StyleSheet.create({
     container: { flex: 1, justifyContent: 'center', padding: 24 },
+    logo: { alignItems: 'center', marginBottom: 16 },
     title: { fontSize: 32, fontWeight: 'bold', textAlign: 'center', marginBottom: 32 },
-    input: { borderWidth: 1, borderRadius: 8, padding: 12, marginBottom: 16 },
+    input: { marginBottom: 16 },
     error: { color: '#DC2626', marginBottom: 12, textAlign: 'center' },
-    button: { padding: 16, borderRadius: 8, alignItems: 'center' },
-    buttonText: { color: '#fff', fontWeight: '600', fontSize: 16 },
+    button: { width: '100%', marginTop: 26 },
 });

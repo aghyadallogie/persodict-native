@@ -1,5 +1,6 @@
-import { TranslatedPhrase } from '@/components/translate/translated-phrase';
+import { PhraseView } from '@/components/history/phrase-view';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Screen } from '@/components/ui/screen';
 import { historyRepository } from '@/features/history';
 import { useSubmitTranslate } from '@/features/translate/use-translate';
@@ -13,7 +14,6 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   View
 } from 'react-native';
 import useSWR from 'swr';
@@ -56,27 +56,14 @@ export default function HomeScreen() {
           contentContainerStyle={{ paddingBottom: 32, paddingHorizontal: 12 }}
         >
           <View style={styles.form}>
-            <TextInput
+            <Input
               value={text}
               onChangeText={(t) => {
                 setText(t);
                 if (error) clearResult();
               }}
               placeholder="Text to translate"
-              placeholderTextColor={colors.textMuted}
-              style={[
-                styles.input,
-                {
-                  borderColor: colors.border,
-                  color: colors.text,
-                  boxShadow: `0px -2px -8px ${colors.shadow}`,
-                  borderTopColor: colors.shadow,
-                  borderLeftColor: colors.shadow,
-                  borderRightColor: colors.border,
-                  borderBottomColor: colors.border,
-                  backgroundColor: colors.inputBackground,
-                },
-              ]}
+              style={styles.input}
               editable={!isLoading}
               onSubmitEditing={onSubmit}
               returnKeyType="go"
@@ -102,7 +89,9 @@ export default function HomeScreen() {
           )}
 
           {shown && (
-            <TranslatedPhrase phrase={shown} />
+            <View style={styles.result}>
+              <PhraseView key={shown.id} phrase={shown} waitForExit />
+            </View>
           )}
 
           {!shown && phrases && phrases.length === 0 && (
@@ -125,17 +114,15 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    borderWidth: 1,
-    borderRadius: 10,
-    paddingVertical: 15,
-    paddingHorizontal: 12,
-    fontSize: 16,
   },
   error: {
     color: '#DC2626',
     fontSize: 13,
     textAlign: 'center',
     marginTop: 12,
+  },
+  result: {
+    marginTop: 20,
   },
   sectionLabel: {
     fontSize: 12,

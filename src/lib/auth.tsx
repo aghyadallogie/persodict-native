@@ -61,7 +61,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
             if (!res.ok) {
                 if (res.status === 401) throw new Error('Invalid email or password');
-                throw new Error(`Login failed (${res.status})`);
+                throw new Error('Invalid email or password!');
             }
 
             const body = (await res.json().catch(() => null)) as AuthResult | null;

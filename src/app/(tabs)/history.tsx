@@ -3,7 +3,8 @@ import { PhraseView } from '@/components/history/phrase-view';
 import { Screen } from '@/components/ui/screen';
 import { useHistory } from '@/features/history/use-history';
 import { useTheme } from '@/lib/theme';
-import { ActivityIndicator, FlatList, Text } from 'react-native';
+import { ActivityIndicator, Text } from 'react-native';
+import Animated, { LinearTransition } from 'react-native-reanimated';
 
 export default function HistoryScreen() {
   const { colors } = useTheme();
@@ -40,8 +41,9 @@ export default function HistoryScreen() {
 
   return (
     <Screen style={{ padding: 0 }}>
-      <FlatList
+      <Animated.FlatList
         data={orderedTranslations}
+        itemLayoutAnimation={LinearTransition.duration(250)}
         keyExtractor={(p) => p.id}
         renderItem={({ item }) => <PhraseView phrase={item} />}
         contentContainerStyle={{ padding: 16, gap: 22 }}
