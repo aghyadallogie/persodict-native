@@ -1,8 +1,10 @@
 import { PhraseView } from '@/components/history/phrase-view';
+import { EmptyTranslate } from '@/components/translate/empty-translate';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Screen } from '@/components/ui/screen';
 import { historyRepository } from '@/features/history';
+import { useSettings } from '@/features/settings/use-settings';
 import { useSubmitTranslate } from '@/features/translate/use-translate';
 import { useTheme } from '@/lib/theme';
 import { Ionicons } from '@expo/vector-icons';
@@ -22,6 +24,7 @@ export default function HomeScreen() {
   const { colors } = useTheme();
   const { handleSubmit, isLoading, error, result, clearResult } = useSubmitTranslate();
   const [text, setText] = useState('');
+  const { userLangs, isLoading: settingsLoading } = useSettings();
 
   const { data: phrases, isLoading: phrasesLoading } = useSWR('phrases', () =>
     historyRepository.listHistory()
@@ -94,10 +97,8 @@ export default function HomeScreen() {
             </View>
           )}
 
-          {!shown && phrases && phrases.length === 0 && (
-            <Text>
-              Translate something to get started.
-            </Text>
+          {!shown && phrases && phrases.length === 0 && !settingsLoading && (
+            <EmptyTranslate userLangs={userLangs} />
           )}
         </ScrollView>
       </Screen>

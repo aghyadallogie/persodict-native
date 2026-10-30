@@ -1,4 +1,5 @@
 import { Screen } from '@/components/ui/screen';
+import { useAccount } from '@/features/account/use-account';
 import { langs } from '@/features/settings/langs';
 import { LanguageFlag } from '@/features/settings/language-flag';
 import { useSettings } from '@/features/settings/use-settings';
@@ -16,6 +17,7 @@ import {
 export default function SettingsScreen() {
   const { colors } = useTheme();
   const { signOut } = useAuth();
+  const { email, isLoading: accountLoading } = useAccount();
   const {
     userLangs,
     isLoading,
@@ -68,14 +70,15 @@ export default function SettingsScreen() {
           </Text>
         )}
 
-        {!isLoading && !hasError && userLangs.length === 0 && (
-          <Text style={[styles.helper, { color: colors.textMuted }]}>
-            You haven't selected any languages yet.
-          </Text>
-        )}
-
         {/* Log out section */}
-        <Text style={[styles.sectionLabel, { color: colors.textMuted }]}>Account</Text>
+        <Text style={[styles.sectionLabel, { color: colors.text }]}>Account: </Text>
+        <Text
+          style={[styles.email, { color: colors.textMuted }]}
+          numberOfLines={1}
+          selectable
+        >
+          {email ?? (accountLoading ? 'Loading…' : '—')}
+        </Text>
         <View
           style={[
             styles.card,
@@ -148,6 +151,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingVertical: 14,
   },
+  accountRow: {
+    alignItems: 'center',
+    gap: 2,
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+  },
+  email: { fontSize: 14, paddingLeft: 34, paddingBottom: 18 },
   rowLeft: { gap: 2 },
   rowLabel: { fontSize: 16, fontWeight: '500' },
   rowHint: { fontSize: 12 },

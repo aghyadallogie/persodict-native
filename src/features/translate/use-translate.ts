@@ -31,7 +31,7 @@ async function translateRequest(
 
   if (res.status === 401) throw new AuthError();
   if (!res.ok) {
-    throw new Error(`Translate failed: ${res.status} ${res.statusText}`);
+    throw new Error(`Translate failed: ${res.status} ${res.statusText} ${raw}`.trim());
   }
 
   return JSON.parse(raw) as Phrase;

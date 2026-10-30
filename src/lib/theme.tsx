@@ -33,15 +33,17 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
             .then((stored) => {
                 if (stored === 'light' || stored === 'dark') setModeState(stored);
             })
+            .catch(() => { })
             .finally(() => setHydrated(true));
     }, []);
 
     const setMode = useCallback(async (m: ThemeMode) => {
         setModeState(m);
-        if (m === null) {
-            await AsyncStorage.removeItem(STORAGE_KEY);
-        } else {
-            await AsyncStorage.setItem(STORAGE_KEY, m);
+        try {
+            if (m === null) await AsyncStorage.removeItem(STORAGE_KEY);
+            else await AsyncStorage.setItem(STORAGE_KEY, m);
+        } catch (e) {
+            console.warn('Failed to persist theme mode', e);
         }
     }, []);
 

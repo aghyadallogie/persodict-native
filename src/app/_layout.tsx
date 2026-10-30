@@ -1,13 +1,20 @@
-// src/app/_layout.tsx
 import { AuthProvider, useAuth } from '@/lib/auth';
 import { ThemeProvider } from '@/lib/theme';
 import { Stack } from 'expo-router';
+import * as SplashScreen from 'expo-splash-screen';
+import { useEffect } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+
+SplashScreen.preventAutoHideAsync().catch(() => { });
 
 function RootNavigator() {
   const { session, isLoading } = useAuth();
 
-  if (isLoading) return null; // Or a splash screen
+  useEffect(() => {
+    if (!isLoading) SplashScreen.hide();
+  }, [isLoading]);
+
+  if (isLoading) return null;
 
   const isLoggedIn = !!session;
 
@@ -19,6 +26,7 @@ function RootNavigator() {
 
       <Stack.Protected guard={!isLoggedIn}>
         <Stack.Screen name="login" options={{ headerShown: false }} />
+        <Stack.Screen name="register" options={{ headerShown: false }} />
       </Stack.Protected>
     </Stack>
   );

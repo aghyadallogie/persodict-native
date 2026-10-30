@@ -6,7 +6,7 @@ export function NoWords({ error }: { error: Error | null }) {
     return (
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 24 }}>
             <Text style={{ color: colors.text, fontSize: 18, fontWeight: '600', marginBottom: 8 }}>
-                No phrases yet
+                No translated phrases yet!
             </Text>
             <Text style={{ color: colors.textMuted, textAlign: 'center' }}>
                 {error

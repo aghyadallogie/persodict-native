@@ -3,6 +3,7 @@ import { Input } from '@/components/ui/input';
 import { Logo } from '@/components/ui/logo';
 import { useAuth } from '@/lib/auth';
 import { useTheme } from '@/lib/theme';
+import { router } from 'expo-router';
 import { useState } from 'react';
 import {
     ActivityIndicator,
@@ -81,6 +82,17 @@ export default function LoginScreen() {
             >
                 {submitting ? <ActivityIndicator color={colors.primary} /> : 'Log In'}
             </Button>
+
+            <Text style={[styles.switch, { color: colors.textMuted }]}>
+                New here?{' '}
+                <Text
+                    style={{ color: colors.primary, fontWeight: '600' }}
+                    onPress={() => router.replace('/register')}
+                    accessibilityRole="link"
+                >
+                    Create an account
+                </Text>
+            </Text>
         </KeyboardAvoidingView>
     );
 }
@@ -92,4 +104,5 @@ const styles = StyleSheet.create({
     input: { marginBottom: 16 },
     error: { color: '#DC2626', marginBottom: 12, textAlign: 'center' },
     button: { width: '100%', marginTop: 26 },
+    switch: { textAlign: 'center', marginTop: 24, fontSize: 15 },
 });
