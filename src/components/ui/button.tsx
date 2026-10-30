@@ -1,4 +1,4 @@
-import { useTheme } from '@/lib/theme';
+import { ThemeColors, useThemedStyles } from '@/lib/use-themed-styles';
 import { ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, TextStyle, ViewStyle } from 'react-native';
 
@@ -6,7 +6,6 @@ type Props = {
   children: ReactNode;
   onPress?: () => void;
   width?: number;
-  hasSlimBorder?: boolean;
   disabled?: boolean;
   style?: ViewStyle | ViewStyle[];
   textStyle?: TextStyle;
@@ -17,13 +16,12 @@ export function Button({
   children,
   onPress,
   width = 66,
-  hasSlimBorder = false,
   disabled = false,
   style,
   textStyle,
   accessibilityLabel,
 }: Props) {
-  const { colors } = useTheme();
+  const { styles } = useThemedStyles(createStyles);
 
   return (
     <Pressable
@@ -33,20 +31,14 @@ export function Button({
       accessibilityLabel={accessibilityLabel}
       style={({ pressed }) => [
         styles.button,
-        {
-          width,
-          borderColor: colors.border,
-          boxShadow: `2px 4px 8px ${colors.shadow}`,
-        },
+        { width },
         pressed && styles.pressed,
         disabled && styles.disabled,
         style,
       ]}
     >
       {typeof children === 'string' ? (
-        <Text style={[styles.text, { color: colors.primary }, textStyle]}>
-          {children}
-        </Text>
+        <Text style={[styles.text, textStyle]}>{children}</Text>
       ) : (
         children
       )}
@@ -54,23 +46,27 @@ export function Button({
   );
 }
 
-const styles = StyleSheet.create({
-  button: {
-    backgroundColor: 'transparent',
-    borderRadius: 10,
-    borderWidth: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexDirection: 'row',
-    gap: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 13,
-  },
-  pressed: { opacity: 0.85 },
-  disabled: { opacity: 0.5 },
-  text: {
-    fontSize: 18,
-    letterSpacing: 0.9,
-    fontWeight: '600',
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    button: {
+      backgroundColor: 'transparent',
+      borderRadius: 10,
+      borderWidth: 1,
+      borderColor: colors.border,
+      boxShadow: `2px 4px 8px ${colors.shadow}`,
+      alignItems: 'center',
+      justifyContent: 'center',
+      flexDirection: 'row',
+      gap: 12,
+      paddingHorizontal: 16,
+      paddingVertical: 13,
+    },
+    pressed: { opacity: 0.85 },
+    disabled: { opacity: 0.5 },
+    text: {
+      color: colors.primary,
+      fontSize: 18,
+      letterSpacing: 0.9,
+      fontWeight: '600',
+    },
+  });

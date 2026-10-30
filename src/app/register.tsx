@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Logo } from '@/components/ui/logo';
 import { useAuth } from '@/lib/auth';
-import { useTheme } from '@/lib/theme';
+import { ThemeColors, useThemedStyles } from '@/lib/use-themed-styles';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import {
@@ -19,7 +19,7 @@ const MIN_PASSWORD_LENGTH = 6;
 
 export default function RegisterScreen() {
     const { signUp } = useAuth();
-    const { colors } = useTheme();
+    const { styles, colors } = useThemedStyles(createStyles);
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -54,7 +54,7 @@ export default function RegisterScreen() {
     return (
         <KeyboardAvoidingView
             behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-            style={[styles.flex, { backgroundColor: colors.background }]}
+            style={styles.flex}
         >
             <ScrollView
                 keyboardShouldPersistTaps="handled"
@@ -64,7 +64,7 @@ export default function RegisterScreen() {
                     <Logo size={96} />
                 </View>
 
-                <Text style={[styles.title, { color: colors.text }]}>Create account</Text>
+                <Text style={styles.title}>Create account</Text>
 
                 <Input
                     placeholder="Name (optional)"
@@ -124,10 +124,10 @@ export default function RegisterScreen() {
                     )}
                 </Button>
 
-                <Text style={[styles.switch, { color: colors.textMuted }]}>
+                <Text style={styles.switch}>
                     Already have an account?{' '}
                     <Text
-                        style={{ color: colors.primary, fontWeight: '600' }}
+                        style={styles.switchLink}
                         onPress={() => router.replace('/login')}
                         accessibilityRole="link"
                     >
@@ -139,13 +139,44 @@ export default function RegisterScreen() {
     );
 }
 
-const styles = StyleSheet.create({
-    flex: { flex: 1 },
-    container: { flexGrow: 1, justifyContent: 'center', padding: 24 },
-    logo: { alignItems: 'center', marginBottom: 16 },
-    title: { fontSize: 32, fontWeight: 'bold', textAlign: 'center', marginBottom: 32 },
-    input: { marginBottom: 16 },
-    error: { color: '#DC2626', marginBottom: 12, textAlign: 'center' },
-    button: { width: '100%', marginTop: 26 },
-    switch: { textAlign: 'center', marginTop: 24, fontSize: 15 },
-});
+const createStyles = (colors: ThemeColors) =>
+    StyleSheet.create({
+        flex: {
+            flex: 1,
+            backgroundColor: colors.background
+        },
+        container: {
+            flexGrow: 1,
+            justifyContent: 'center',
+            padding: 24
+        },
+        logo: {
+            alignItems: 'center',
+            marginBottom: 16
+        },
+        title: {
+            color: colors.text,
+            fontSize: 32,
+            fontWeight: 'bold',
+            textAlign: 'center',
+            marginBottom: 32,
+        },
+        input: { marginBottom: 20 },
+        error: {
+            color: '#DC2626',
+            marginBottom: 12,
+            textAlign: 'center'
+        },
+        button: {
+            width: '100%',
+            marginTop: 26,
+            marginBottom: 12
+        },
+        switch: {
+            color: colors.textMuted,
+            textAlign: 'center',
+            marginTop: 24,
+            fontSize: 15
+        },
+        switchLink: { color: colors.primary },
+    });

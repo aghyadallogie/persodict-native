@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Logo } from '@/components/ui/logo';
 import { useAuth } from '@/lib/auth';
-import { useTheme } from '@/lib/theme';
+import { ThemeColors, useThemedStyles } from '@/lib/use-themed-styles';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import {
@@ -16,7 +16,7 @@ import {
 
 export default function LoginScreen() {
     const { signIn } = useAuth();
-    const { colors } = useTheme();
+    const { styles, colors } = useThemedStyles(createStyles);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [submitting, setSubmitting] = useState(false);
@@ -39,13 +39,13 @@ export default function LoginScreen() {
     return (
         <KeyboardAvoidingView
             behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-            style={[styles.container, { backgroundColor: colors.background }]}
+            style={styles.container}
         >
             <View style={styles.logo}>
                 <Logo size={96} />
             </View>
 
-            <Text style={[styles.title, { color: colors.text }]}>Persodict</Text>
+            <Text style={styles.title}>Persodict</Text>
 
             <Input
                 placeholder="Email"
@@ -83,10 +83,10 @@ export default function LoginScreen() {
                 {submitting ? <ActivityIndicator color={colors.primary} /> : 'Log In'}
             </Button>
 
-            <Text style={[styles.switch, { color: colors.textMuted }]}>
+            <Text style={styles.switch}>
                 New here?{' '}
                 <Text
-                    style={{ color: colors.primary, fontWeight: '600' }}
+                    style={styles.switchLink}
                     onPress={() => router.replace('/register')}
                     accessibilityRole="link"
                 >
@@ -97,12 +97,25 @@ export default function LoginScreen() {
     );
 }
 
-const styles = StyleSheet.create({
-    container: { flex: 1, justifyContent: 'center', padding: 24 },
-    logo: { alignItems: 'center', marginBottom: 16 },
-    title: { fontSize: 32, fontWeight: 'bold', textAlign: 'center', marginBottom: 32 },
-    input: { marginBottom: 16 },
-    error: { color: '#DC2626', marginBottom: 12, textAlign: 'center' },
-    button: { width: '100%', marginTop: 26 },
-    switch: { textAlign: 'center', marginTop: 24, fontSize: 15 },
-});
+const createStyles = (colors: ThemeColors) =>
+    StyleSheet.create({
+        container: {
+            flex: 1,
+            justifyContent: 'center',
+            padding: 24,
+            backgroundColor: colors.background,
+        },
+        logo: { alignItems: 'center', marginBottom: 16 },
+        title: {
+            color: colors.text,
+            fontSize: 32,
+            fontWeight: 'bold',
+            textAlign: 'center',
+            marginBottom: 32,
+        },
+        input: { marginBottom: 20 },
+        error: { color: '#DC2626', marginBottom: 12, textAlign: 'center' },
+        button: { width: '100%', marginTop: 26, marginBottom: 12 },
+        switch: { color: colors.textMuted, textAlign: 'center', marginTop: 24, fontSize: 15 },
+        switchLink: { color: colors.primary },
+    });

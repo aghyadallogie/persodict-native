@@ -1,7 +1,7 @@
 import type { Phrase } from '@/features/history/types';
 import { useDeletePhrase } from '@/features/history/use-delete-phrase';
 import { flagFor } from '@/lib/lang-flag';
-import { useTheme } from '@/lib/theme';
+import { ThemeColors, useThemedStyles } from '@/lib/use-themed-styles';
 import { Alert, StyleSheet, Text, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
@@ -16,17 +16,16 @@ import Animated, {
 import { scheduleOnRN } from 'react-native-worklets';
 
 const EXIT_MS = 250;
-const SWIPE_THRESHOLD = 0.4; // fraction of card width that triggers delete
-const FLING_VELOCITY = -900; // px/s; a quick flick also deletes
+const SWIPE_THRESHOLD = 0.4;
+const FLING_VELOCITY = -900;
 
 type Props = {
     phrase: Phrase;
-    /** Wait for the previous card's exit animation before entering. */
     waitForExit?: boolean;
 };
 
 export function PhraseView({ phrase, waitForExit = false }: Props) {
-    const { colors } = useTheme();
+    const { styles } = useThemedStyles(createStyles);
     const { handleDeletePhrase } = useDeletePhrase();
 
     const translateX = useSharedValue(0);
@@ -43,13 +42,12 @@ export function PhraseView({ phrase, waitForExit = false }: Props) {
     };
 
     const pan = Gesture.Pan()
-        .activeOffsetX([-15, 15]) // horizontal intent only...
-        .failOffsetY([-10, 10]) // ...so vertical scrolling still wins
+        .activeOffsetX([-15, 15])
+        .failOffsetY([-10, 10])
         .onStart(() => {
             startX.value = translateX.value;
         })
         .onUpdate((event) => {
-            // swipe left only
             translateX.value = Math.min(0, startX.value + event.translationX);
         })
         .onEnd((event) => {
@@ -82,37 +80,19 @@ export function PhraseView({ phrase, waitForExit = false }: Props) {
                 cardWidth.value = e.nativeEvent.layout.width;
             }}
         >
-            {/* Revealed behind the card as it slides left */}
             <Animated.View style={[styles.hint, hintStyle]}>
                 <Text style={styles.hintText}>Delete</Text>
             </Animated.View>
 
             <GestureDetector gesture={pan}>
-                <Animated.View
-                    style={[
-                        styles.card,
-                        {
-                            borderColor: colors.border,
-                            backgroundColor: colors.background,
-                            boxShadow: `0px 2px 8px ${colors.shadow}`,
-                        },
-                        cardStyle,
-                    ]}
-                >
+                <Animated.View style={[styles.card, cardStyle]}>
                     {entries.map(([lang, text], index) => (
                         <View
                             key={lang}
-                            style={[
-                                styles.row,
-                                index < entries.length - 1 && {
-                                    borderBottomWidth: 1,
-                                    borderStyle: 'dotted',
-                                    borderBottomColor: colors.border,
-                                },
-                            ]}
+                            style={[styles.row, index < entries.length - 1 && styles.rowDivider]}
                         >
                             <Text style={styles.flag}>{flagFor(lang)}</Text>
-                            <Text style={[styles.text, { color: colors.text }]} numberOfLines={2}>
+                            <Text style={styles.text} numberOfLines={2}>
                                 {text}
                             </Text>
                         </View>
@@ -123,32 +103,47 @@ export function PhraseView({ phrase, waitForExit = false }: Props) {
     );
 }
 
-const styles = StyleSheet.create({
-    card: {
-        borderWidth: 1,
-        borderRadius: 10,
-        paddingVertical: 4,
-        paddingHorizontal: 12,
-    },
-    row: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 12,
-        paddingVertical: 6,
-    },
-    flag: { fontSize: 20 },
-    text: { fontSize: 16, flex: 1, textAlign: 'right', paddingRight: 4 },
-    hint: {
-        ...StyleSheet.absoluteFill,
-        borderRadius: 10,
-        backgroundColor: '#DC2626',
-        justifyContent: 'center',
-        alignItems: 'flex-end',
-        paddingRight: 24,
-    },
-    hintText: {
-        color: '#fff',
-        fontWeight: '700',
-        fontSize: 15,
-    },
-});
+const createStyles = (colors: ThemeColors) =>
+    StyleSheet.create({
+        card: {
+            borderWidth: 1,
+            borderRadius: 10,
+            borderColor: colors.border,
+            backgroundColor: colors.background,
+            boxShadow: `0px 2px 8px ${colors.shadow}`,
+            paddingVertical: 4,
+            paddingHorizontal: 15,
+        },
+        row: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 12,
+            paddingVertical: 6,
+        },
+        rowDivider: {
+            borderBottomWidth: 1,
+            borderStyle: 'dotted',
+            borderBottomColor: colors.border,
+        },
+        flag: { fontSize: 20 },
+        text: {
+            color: colors.text,
+            fontSize: 16,
+            flex: 1,
+            textAlign: 'right',
+            paddingRight: 4
+        },
+        hint: {
+            ...StyleSheet.absoluteFill,
+            borderRadius: 10,
+            backgroundColor: '#DC2626',
+            justifyContent: 'center',
+            alignItems: 'flex-end',
+            paddingRight: 24,
+        },
+        hintText: {
+            color: '#fff',
+            fontWeight: '700',
+            fontSize: 15,
+        },
+    });

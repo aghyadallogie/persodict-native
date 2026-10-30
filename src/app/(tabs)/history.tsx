@@ -2,17 +2,17 @@ import { NoWords } from '@/components/history/no-words';
 import { PhraseView } from '@/components/history/phrase-view';
 import { Screen } from '@/components/ui/screen';
 import { useHistory } from '@/features/history/use-history';
-import { useTheme } from '@/lib/theme';
-import { ActivityIndicator, Text } from 'react-native';
+import { ThemeColors, useThemedStyles } from '@/lib/use-themed-styles';
+import { ActivityIndicator, StyleSheet, Text } from 'react-native';
 import Animated, { LinearTransition } from 'react-native-reanimated';
 
 export default function HistoryScreen() {
-  const { colors } = useTheme();
+  const { styles, colors } = useThemedStyles(createStyles);
   const { orderedTranslations, isLoading, isError, refresh } = useHistory();
 
   if (isLoading) {
     return (
-      <Screen style={{ justifyContent: 'center', alignItems: 'center' }}>
+      <Screen style={styles.center}>
         <ActivityIndicator color={colors.primary} />
       </Screen>
     );
@@ -20,11 +20,9 @@ export default function HistoryScreen() {
 
   if (isError) {
     return (
-      <Screen style={{ justifyContent: 'center', alignItems: 'center' }}>
-        <Text style={{ color: colors.text, marginBottom: 12 }}>
-          Failed to load history
-        </Text>
-        <Text onPress={() => refresh()} style={{ color: colors.primary }}>
+      <Screen style={styles.center}>
+        <Text style={styles.errorTitle}>Failed to load history</Text>
+        <Text onPress={() => refresh()} style={styles.retry}>
           Retry
         </Text>
       </Screen>
@@ -40,13 +38,13 @@ export default function HistoryScreen() {
   }
 
   return (
-    <Screen style={{ padding: 0 }}>
+    <Screen style={styles.list}>
       <Animated.FlatList
         data={orderedTranslations}
         itemLayoutAnimation={LinearTransition.duration(250)}
         keyExtractor={(p) => p.id}
         renderItem={({ item }) => <PhraseView phrase={item} />}
-        contentContainerStyle={{ padding: 16, gap: 22 }}
+        contentContainerStyle={styles.listContent}
         initialNumToRender={8}
         maxToRenderPerBatch={8}
         windowSize={5}
@@ -54,3 +52,12 @@ export default function HistoryScreen() {
     </Screen>
   );
 }
+
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    center: { justifyContent: 'center', alignItems: 'center' },
+    errorTitle: { color: colors.text, marginBottom: 12 },
+    retry: { color: colors.primary },
+    list: { padding: 0 },
+    listContent: { padding: 16, gap: 22 },
+  });

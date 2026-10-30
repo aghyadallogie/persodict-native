@@ -6,7 +6,7 @@ import { Screen } from '@/components/ui/screen';
 import { historyRepository } from '@/features/history';
 import { useSettings } from '@/features/settings/use-settings';
 import { useSubmitTranslate } from '@/features/translate/use-translate';
-import { useTheme } from '@/lib/theme';
+import { ThemeColors, useThemedStyles } from '@/lib/use-themed-styles';
 import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useState } from 'react';
 import {
@@ -21,7 +21,7 @@ import {
 import useSWR from 'swr';
 
 export default function HomeScreen() {
-  const { colors } = useTheme();
+  const { styles, colors } = useThemedStyles(createStyles);
   const { handleSubmit, isLoading, error, result, clearResult } = useSubmitTranslate();
   const [text, setText] = useState('');
   const { userLangs, isLoading: settingsLoading } = useSettings();
@@ -34,6 +34,10 @@ export default function HomeScreen() {
   const latest = ordered[0] ?? null;
   const shown = result ?? latest;
   const canSubmit = text.trim().length > 0 && !isLoading;
+
+  // Empty state needs the language settings too, so keep the spinner up until both are in.
+  const showEmpty = !shown && !!phrases && phrases.length === 0 && !settingsLoading;
+  const showLoading = !shown && !showEmpty && (phrasesLoading || settingsLoading);
 
   useEffect(() => {
     if (phrasesLoading || !phrases || !result) return;
@@ -51,12 +55,12 @@ export default function HomeScreen() {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      style={{ flex: 1 }}
+      style={styles.flex}
     >
       <Screen>
         <ScrollView
           keyboardShouldPersistTaps="handled"
-          contentContainerStyle={{ paddingBottom: 32, paddingHorizontal: 12 }}
+          contentContainerStyle={styles.scroll}
         >
           <View style={styles.form}>
             <Input
@@ -97,41 +101,43 @@ export default function HomeScreen() {
             </View>
           )}
 
-          {!shown && phrases && phrases.length === 0 && !settingsLoading && (
-            <EmptyTranslate userLangs={userLangs} />
+          {showLoading && (
+            <View style={styles.loading}>
+              <ActivityIndicator color={colors.primary} />
+            </View>
           )}
+
+          {showEmpty && <EmptyTranslate userLangs={userLangs} />}
         </ScrollView>
       </Screen>
     </KeyboardAvoidingView>
   );
 }
 
-const styles = StyleSheet.create({
-  form: {
-    flexDirection: 'row',
-    gap: 12,
-    marginTop: 24,
-    alignItems: 'center',
-  },
-  input: {
-    flex: 1,
-  },
-  error: {
-    color: '#DC2626',
-    fontSize: 13,
-    textAlign: 'center',
-    marginTop: 12,
-  },
-  result: {
-    marginTop: 20,
-  },
-  sectionLabel: {
-    fontSize: 12,
-    fontWeight: '600',
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-    textAlign: 'center',
-    marginTop: 24,
-    marginBottom: 8,
-  },
-});
+const createStyles = (_colors: ThemeColors) =>
+  StyleSheet.create({
+    flex: { flex: 1 },
+    scroll: { paddingBottom: 32, paddingHorizontal: 12 },
+    form: {
+      flexDirection: 'row',
+      gap: 12,
+      marginTop: 24,
+      alignItems: 'center',
+    },
+    input: {
+      flex: 1,
+    },
+    error: {
+      color: '#DC2626',
+      fontSize: 13,
+      textAlign: 'center',
+      marginTop: 12,
+    },
+    result: {
+      marginTop: 20,
+    },
+    loading: {
+      marginTop: 40,
+      alignItems: 'center',
+    },
+  });
