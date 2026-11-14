@@ -1,17 +1,8 @@
-import { StyleSheet, Text, View } from "react-native";
+import { useAuth } from '@/lib/auth';
+import { Redirect } from 'expo-router';
 
 export default function Index() {
-  return (
-    <View style={styles.container}>
-      <Text>Welcome to Persodict!</Text>
-    </View>
-  );
-}
+  const { session } = useAuth();
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-});
+  return <Redirect href={session ? '/home' : '/login'} />;
+}
