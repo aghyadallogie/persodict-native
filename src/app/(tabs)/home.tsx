@@ -48,8 +48,8 @@ export default function HomeScreen() {
 
   const onSubmit = async () => {
     if (!text.trim() || isLoading) return;
-    await handleSubmit(text);
-    setText('');
+    // Keep what the user typed if the translation failed, so they can retry.
+    if (await handleSubmit(text)) setText('');
   };
 
   return (

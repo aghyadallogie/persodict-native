@@ -64,11 +64,15 @@ export function useSubmitTranslate() {
   const { userLangs } = useSettings();
 
   const handleSubmit = useCallback(
-    async (text: string) => {
-      if (!session) return signOut();
+    /** Resolves to true only when the translation succeeded, so callers can keep the input on failure. */
+    async (text: string): Promise<boolean> => {
+      if (!session) {
+        await signOut();
+        return false;
+      }
       if (!userLangs.length) {
         setError('Please select at least one language');
-        return;
+        return false;
       }
 
       setError(null);
@@ -76,13 +80,15 @@ export function useSubmitTranslate() {
 
       try {
         await trigger({ text });
+        return true;
       } catch (e) {
         console.error('[translate] trigger threw:', e);
         if (e instanceof AuthError) {
           await signOut();
-          return;
+          return false;
         }
         setError('Translation failed. Please try again.');
+        return false;
       }
     },
     [trigger, session, signOut, userLangs]
