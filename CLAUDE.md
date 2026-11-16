@@ -18,11 +18,18 @@ npm project (`package-lock.json`), so use `npx`, not `bunx`.
 npx expo start          # dev server (npm start / android / ios / web)
 npx expo lint           # lint (npm run lint)
 npx tsc --noEmit        # typecheck
+npm test                # jest (jest-expo preset) — one run, not watch mode
 ```
 
 The README targets Expo Go (SDK 57) on a phone, so a dependency with native code that Expo Go doesn't bundle would require switching to a development build.
 
-There is no test setup. `npm run reset-project` is a leftover template script that points at a `scripts/reset-project.js` which doesn't exist. `scripts/generate-icons.mjs` regenerates the app icon/splash/favicon PNGs from the logo geometry (`npm i --no-save sharp && node scripts/generate-icons.mjs`; `sharp` is intentionally not a dependency). `eas.json` defines an internal `preview` APK build profile.
+**Tests** live in `src/__tests__/`, mirroring `src/` (outside `src/app/`, which Expo Router treats as routes), named `*.test.ts(x)`. Stack: Jest 29 + `jest-expo` + `@testing-library/react-native` v14 (config is the `jest` block in `package.json`; `@/*` is mapped to `src/*`). Things that differ from older RNTL / what you'd expect:
+- In RNTL v14, `render`, `renderHook`, `fireEvent` and `act` are all async: `await` them.
+- Updates that come from SWR don't render inside RNTL's `waitFor` and don't refresh `renderHook`'s `result.current`. In SWR tests, read the hook's values during render into a local variable and poll inside `act` (see the `eventually` helper in `use-delete-phrase.test.tsx`). SWR also only re-renders for fields read during render, so destructure them there.
+- Mock the boundary, not SWR: `jest.mock('@/lib/api')` (keep `AuthError` via `jest.requireActual`), `@/lib/auth`, and `@/lib/theme` for components. Give each test its own cache with `<SWRConfig value={{ provider: () => new Map() }}>`.
+- Covered so far: `apiFetch`, the settings/history API code, `useDeletePhrase` (optimistic remove + rollback), `useSubmitTranslate`, `useAuthSubmit` and the register screen's validation. Jest may print a harmless "worker failed to exit gracefully" warning (SWR timers).
+
+`npm run reset-project` is a leftover template script that points at a `scripts/reset-project.js` which doesn't exist. `scripts/generate-icons.mjs` regenerates the app icon/splash/favicon PNGs from the logo geometry (`npm i --no-save sharp && node scripts/generate-icons.mjs`; `sharp` is intentionally not a dependency). `eas.json` defines an internal `preview` APK build profile.
 
 `app.json` enables `typedRoutes` and `reactCompiler` experiments. Path alias `@/*` → `src/*`.
 

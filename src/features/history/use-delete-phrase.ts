@@ -10,33 +10,31 @@ export function useDeletePhrase() {
 
     const handleDeletePhrase = useCallback(
         async (phraseId: string) => {
-            const cacheKey = 'phrases';
-
-            // Optimistic: drop it from the list immediately
-            const previous = await mutate<Phrase[]>(
-                cacheKey,
-                (current) => (current ?? []).filter((p) => p.id !== phraseId),
-                false
-            );
-
             try {
-                const res = await apiFetch(`/phrases/${phraseId}`, { method: 'DELETE' });
-
-                if (!res.ok) {
-                    throw new Error(`Delete failed: ${res.status}`);
-                }
-
-                // Server returns the deleted Phrase — no need to refetch.
-                await mutate(cacheKey);
+                await mutate<Phrase[]>(
+                    'phrases',
+                    async (): Promise<undefined> => {
+                        const res = await apiFetch(`/phrases/${phraseId}`, { method: 'DELETE' });
+                        if (!res.ok) throw new Error(`Delete failed: ${res.status}`);
+                        // The response isn't written to the cache (populateCache: false);
+                        // the revalidation below refetches the list instead.
+                        return undefined;
+                    },
+                    {
+                        // Drop it from the list immediately; SWR restores the previous list if
+                        // the request throws.
+                        optimisticData: (current) => (current ?? []).filter((p) => p.id !== phraseId),
+                        rollbackOnError: true,
+                        populateCache: false,
+                        revalidate: true,
+                    }
+                );
             } catch (err) {
-                // Dead token: signing out also clears the cache, so there is nothing to roll back.
+                // Dead token: signing out also clears the cache, so there is nothing to keep.
                 if (err instanceof AuthError) {
                     await signOut();
                     return;
                 }
-
-                // Roll back on failure
-                await mutate(cacheKey, previous, false);
                 throw err;
             }
         },
