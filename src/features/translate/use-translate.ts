@@ -32,20 +32,7 @@ export function useSubmitTranslate() {
 
   const { trigger, isMutating } = useSWRMutation(
     session ? 'translate' : null,
-    translateRequest,
-    {
-      onSuccess: async (data) => {
-        try {
-          await mutate('phrases');
-        } catch (e) {
-          console.warn('[translate] mutate phrases failed:', e);
-        }
-        setResult(data);
-      },
-      onError: (e) => {
-        console.error('[translate] onError:', e);
-      },
-    }
+    translateRequest
   );
 
   const { userLangs } = useSettings();
@@ -66,7 +53,20 @@ export function useSubmitTranslate() {
       setResult(null);
 
       try {
-        await trigger({ text });
+        const phrase = await trigger({ text });
+
+        // Put the new phrase straight into the history cache (no refetch) so the result
+        // can show immediately, and so home's "result missing from history" check holds.
+        await mutate<Phrase[]>(
+          'phrases',
+          (current) =>
+            current?.some((p) => p.id === phrase.id) ? current : [...(current ?? []), phrase],
+          { revalidate: false }
+        );
+        setResult(phrase);
+
+        // Reconcile with the server in the background; the result is already on screen.
+        mutate('phrases').catch((e) => console.warn('[translate] history refresh failed:', e));
         return true;
       } catch (e) {
         console.error('[translate] trigger threw:', e);
@@ -78,7 +78,7 @@ export function useSubmitTranslate() {
         return false;
       }
     },
-    [trigger, session, signOut, userLangs]
+    [trigger, mutate, session, signOut, userLangs]
   );
 
   const clearResult = useCallback(() => {
