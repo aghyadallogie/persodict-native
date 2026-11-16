@@ -1,17 +1,5 @@
-import { AuthError } from '@/features/history/api-repository';
-import * as SecureStore from 'expo-secure-store';
+import { apiFetch } from '@/lib/api';
 import type { SettingsResponse, UserSettings } from './types';
-
-const SESSION_KEY = 'persodict_session';
-
-async function authHeaders(): Promise<Record<string, string>> {
-    const token = await SecureStore.getItemAsync(SESSION_KEY);
-    if (!token) throw new AuthError();
-    return {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-    };
-}
 
 /** Normalizes both possible envelopes from GET /settings. */
 function unwrap(body: SettingsResponse): UserSettings {
@@ -20,10 +8,8 @@ function unwrap(body: SettingsResponse): UserSettings {
 }
 
 export async function fetchSettings(): Promise<UserSettings> {
-    const headers = await authHeaders();
-    const res = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/settings`, { headers });
+    const res = await apiFetch('/settings');
 
-    if (res.status === 401) throw new AuthError();
     if (res.status === 404) {
         // New user with no settings yet — treat as empty
         return { userId: '', userLangs: [] };
@@ -37,14 +23,11 @@ export async function saveSettings(
     userId: string,
     userLangs: string[]
 ): Promise<UserSettings> {
-    const headers = await authHeaders();
-    const res = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/settings`, {
+    const res = await apiFetch('/settings', {
         method: 'POST',
-        headers,
         body: JSON.stringify({ userId, userLangs }),
     });
 
-    if (res.status === 401) throw new AuthError();
     if (!res.ok) throw new Error(`Failed to save settings: ${res.status}`);
 
     return unwrap((await res.json()) as SettingsResponse);

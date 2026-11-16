@@ -9,6 +9,7 @@ import {
     useState,
 } from "react";
 import { mutate as clearCache } from "swr";
+import { SESSION_KEY } from "./api";
 
 type AuthContextType = {
   session: string | null;
@@ -20,7 +21,6 @@ type AuthContextType = {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const SESSION_KEY = "persodict_session";
 const AUTH_TIMEOUT_MS = 15_000;
 
 type AuthResult = { id: string; email: string; token: string };

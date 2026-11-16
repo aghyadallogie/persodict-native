@@ -1,5 +1,5 @@
 import { useAccount } from '@/features/account/use-account';
-import { AuthError } from '@/features/history/api-repository';
+import { AuthError } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
 import { useCallback, useState } from 'react';
 import useSWR, { useSWRConfig } from 'swr';

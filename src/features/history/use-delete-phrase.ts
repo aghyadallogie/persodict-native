@@ -1,10 +1,8 @@
+import { apiFetch, AuthError } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
-import * as SecureStore from 'expo-secure-store';
 import { useCallback } from 'react';
 import { useSWRConfig } from 'swr';
 import type { Phrase } from './types';
-
-const SESSION_KEY = 'persodict_session';
 
 export function useDeletePhrase() {
     const { mutate } = useSWRConfig();
@@ -12,12 +10,6 @@ export function useDeletePhrase() {
 
     const handleDeletePhrase = useCallback(
         async (phraseId: string) => {
-            const token = await SecureStore.getItemAsync(SESSION_KEY);
-            if (!token) {
-                await signOut();
-                return;
-            }
-
             const cacheKey = 'phrases';
 
             // Optimistic: drop it from the list immediately
@@ -28,21 +20,8 @@ export function useDeletePhrase() {
             );
 
             try {
-                const res = await fetch(
-                    `${process.env.EXPO_PUBLIC_API_URL}/phrases/${phraseId}`,
-                    {
-                        method: 'DELETE',
-                        headers: {
-                            Authorization: `Bearer ${token}`,
-                            'Content-Type': 'application/json',
-                        },
-                    }
-                );
+                const res = await apiFetch(`/phrases/${phraseId}`, { method: 'DELETE' });
 
-                if (res.status === 401) {
-                    await signOut();
-                    return;
-                }
                 if (!res.ok) {
                     throw new Error(`Delete failed: ${res.status}`);
                 }
@@ -50,6 +29,12 @@ export function useDeletePhrase() {
                 // Server returns the deleted Phrase — no need to refetch.
                 await mutate(cacheKey);
             } catch (err) {
+                // Dead token: signing out also clears the cache, so there is nothing to roll back.
+                if (err instanceof AuthError) {
+                    await signOut();
+                    return;
+                }
+
                 // Roll back on failure
                 await mutate(cacheKey, previous, false);
                 throw err;

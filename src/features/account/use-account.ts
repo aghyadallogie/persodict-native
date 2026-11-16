@@ -1,4 +1,4 @@
-import { AuthError } from '@/features/history/api-repository';
+import { apiFetch, AuthError } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
 import { useEffect } from 'react';
 import useSWR from 'swr';
@@ -13,12 +13,9 @@ type MeBody = {
     user?: { id?: string; email?: string };
 };
 
-async function fetchAccount(token: string): Promise<Account> {
-    const res = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/auth/me`, {
-        headers: { Authorization: `Bearer ${token}` },
-    });
+async function fetchAccount(): Promise<Account> {
+    const res = await apiFetch('/auth/me');
 
-    if (res.status === 401) throw new AuthError();
     if (!res.ok) throw new Error(`Failed to load account: ${res.status}`);
 
     const body = (await res.json()) as MeBody;
@@ -35,7 +32,7 @@ export function useAccount() {
     // Keyed by token so a different login never shows the previous user's email.
     const { data, error, isLoading } = useSWR(
         session ? ['account', session] : null,
-        ([, token]) => fetchAccount(token),
+        () => fetchAccount(),
         { revalidateOnFocus: false },
     );
 

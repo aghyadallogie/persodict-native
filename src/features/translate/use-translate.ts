@@ -1,35 +1,22 @@
-import { AuthError } from '@/features/history/api-repository';
 import type { Phrase } from '@/features/history/types';
+import { apiFetch, AuthError } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
-import * as SecureStore from 'expo-secure-store';
 import { useCallback, useState } from 'react';
 import { useSWRConfig } from 'swr';
 import useSWRMutation from 'swr/mutation';
 import { useSettings } from '../settings/use-settings';
 
-const SESSION_KEY = 'persodict_session';
-
 async function translateRequest(
   _key: string,
   { arg }: { arg: { text: string } }
 ): Promise<Phrase> {
-  const token = await SecureStore.getItemAsync(SESSION_KEY);
-  if (!token) throw new AuthError();
-
-  const url = `${process.env.EXPO_PUBLIC_API_URL}/phrases/translate`;
-
-  const res = await fetch(url, {
+  const res = await apiFetch('/phrases/translate', {
     method: 'POST',
-    headers: {
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json',
-    },
     body: JSON.stringify({ text: arg.text }),
   });
 
   const raw = await res.text();
 
-  if (res.status === 401) throw new AuthError();
   if (!res.ok) {
     throw new Error(`Translate failed: ${res.status} ${res.statusText} ${raw}`.trim());
   }

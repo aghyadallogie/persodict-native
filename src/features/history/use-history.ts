@@ -1,7 +1,7 @@
+import { AuthError } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
 import { useEffect } from 'react';
 import useSWR from 'swr';
-import { AuthError } from './api-repository';
 import { historyRepository } from './index';
 
 export function useHistory() {
