@@ -136,13 +136,13 @@ const createStyles = (colors: ThemeColors) =>
         hint: {
             ...StyleSheet.absoluteFill,
             borderRadius: 10,
-            backgroundColor: '#DC2626',
+            backgroundColor: colors.danger,
             justifyContent: 'center',
             alignItems: 'flex-end',
             paddingRight: 24,
         },
         hintText: {
-            color: '#fff',
+            color: colors.white,
             fontWeight: '700',
             fontSize: 15,
         },

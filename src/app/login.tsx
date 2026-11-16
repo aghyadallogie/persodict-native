@@ -114,7 +114,7 @@ const createStyles = (colors: ThemeColors) =>
             marginBottom: 32,
         },
         input: { marginBottom: 20 },
-        error: { color: '#DC2626', marginBottom: 12, textAlign: 'center' },
+        error: { color: colors.danger, marginBottom: 12, textAlign: 'center' },
         button: { width: '100%', marginTop: 26, marginBottom: 12 },
         switch: { color: colors.textMuted, textAlign: 'center', marginTop: 24, fontSize: 15 },
         switchLink: { color: colors.primary },

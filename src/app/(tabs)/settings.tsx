@@ -101,7 +101,7 @@ const createStyles = (colors: ThemeColors) =>
     },
     helper: { color: colors.textMuted, textAlign: 'center', marginTop: 16 },
     errorText: {
-      color: '#DC2626',
+      color: colors.danger,
       textAlign: 'center',
       marginTop: 16,
       fontSize: 13,

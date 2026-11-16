@@ -7,6 +7,8 @@ import { fetchSettings, saveSettings } from './api-repository';
 import type { UserSettings } from './types';
 
 const KEY = 'settings';
+// Module-level so the fallback keeps the same identity between renders.
+const NO_LANGS: string[] = [];
 
 export function useSettings() {
     const { session, signOut } = useAuth();
@@ -20,7 +22,7 @@ export function useSettings() {
         fetchSettings
     );
 
-    const userLangs = data?.userLangs ?? [];
+    const userLangs = data?.userLangs ?? NO_LANGS;
 
     const toggleLang = useCallback(
         async (langCode: string) => {

@@ -163,7 +163,7 @@ const createStyles = (colors: ThemeColors) =>
         },
         input: { marginBottom: 20 },
         error: {
-            color: '#DC2626',
+            color: colors.danger,
             marginBottom: 12,
             textAlign: 'center'
         },

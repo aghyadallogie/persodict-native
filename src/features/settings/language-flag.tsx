@@ -13,7 +13,7 @@ export function LanguageFlag({
     saving: boolean;
     onToggle: () => void;
 }) {
-    const { styles } = useThemedStyles(createStyles);
+    const { styles, colors } = useThemedStyles(createStyles);
 
     return (
         <Pressable
@@ -31,7 +31,7 @@ export function LanguageFlag({
             {picked && (
                 <View style={styles.badge}>
                     {saving ? (
-                        <ActivityIndicator size="small" color="#fff" />
+                        <ActivityIndicator size="small" color={colors.white} />
                     ) : (
                         <Text style={styles.badgeText}>✓</Text>
                     )}
@@ -67,5 +67,5 @@ const createStyles = (colors: ThemeColors) =>
             justifyContent: 'center',
             paddingHorizontal: 4,
         },
-        badgeText: { color: '#fff', fontSize: 12, fontWeight: '700' },
+        badgeText: { color: colors.white, fontSize: 12, fontWeight: '700' },
     });

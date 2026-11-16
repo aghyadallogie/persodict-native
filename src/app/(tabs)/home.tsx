@@ -114,7 +114,7 @@ export default function HomeScreen() {
   );
 }
 
-const createStyles = (_colors: ThemeColors) =>
+const createStyles = (colors: ThemeColors) =>
   StyleSheet.create({
     flex: { flex: 1 },
     scroll: { paddingBottom: 32, paddingHorizontal: 12 },
@@ -128,7 +128,7 @@ const createStyles = (_colors: ThemeColors) =>
       flex: 1,
     },
     error: {
-      color: '#DC2626',
+      color: colors.danger,
       fontSize: 13,
       textAlign: 'center',
       marginTop: 12,

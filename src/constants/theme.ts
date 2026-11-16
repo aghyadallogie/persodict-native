@@ -9,6 +9,8 @@ export const Colors = {
         primary: 'rgba(112, 112, 112, 0.99)',
         border: '#f5f7fB',
         shadow: 'rgba(89, 89, 89, 0.5)',
+        danger: '#DC2626',
+        white: '#FFFFFF',
     },
     dark: {
         background: '#1c1d1dff',
@@ -20,5 +22,7 @@ export const Colors = {
         primary: 'rgba(161, 139, 94, 0.99)',
         border: 'rgb(99, 99, 99, 0.16)',
         shadow: 'rgb(0, 0, 0, 0.9)',
+        danger: '#DC2626',
+        white: '#FFFFFF',
     },
 };
