@@ -10,6 +10,7 @@ export const Colors = {
         border: '#f5f7fB',
         shadow: 'rgba(89, 89, 89, 0.5)',
         danger: '#DC2626',
+        success: '#16A34A',
         white: '#FFFFFF',
     },
     dark: {
@@ -20,9 +21,12 @@ export const Colors = {
         text: '#F5F5F5aa',
         textMuted: '#9CA3AF77',
         primary: 'rgba(161, 139, 94, 0.99)',
-        border: 'rgb(99, 99, 99, 0.16)',
-        shadow: 'rgb(0, 0, 0, 0.9)',
+        // Use rgba() for any color with alpha: React Native accepts rgb() with 4 values, but
+        // Reanimated's own color parser doesn't, and an invalid color breaks animated styles.
+        border: 'rgba(99, 99, 99, 0.16)',
+        shadow: 'rgba(0, 0, 0, 0.9)',
         danger: '#DC2626',
+        success: '#16A34A',
         white: '#FFFFFF',
     },
 };

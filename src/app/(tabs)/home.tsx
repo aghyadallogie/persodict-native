@@ -76,6 +76,7 @@ export default function HomeScreen() {
               returnKeyType="go"
               autoCapitalize="none"
               autoCorrect={false}
+              maxLength={42}
             />
             <Button
               onPress={onSubmit}
