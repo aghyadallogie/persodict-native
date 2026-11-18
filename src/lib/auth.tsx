@@ -10,12 +10,15 @@ import {
 } from "react";
 import { mutate as clearCache } from "swr";
 import { SESSION_KEY } from "./api";
+import { getGoogleIdToken, signOutOfGoogle } from "./google-auth";
 
 type AuthContextType = {
   session: string | null;
   isLoading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string, name?: string) => Promise<void>;
+  /** Logs in (or signs up) with a Google account. Resolves quietly if the user cancels. */
+  signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
 };
 
@@ -27,7 +30,7 @@ type AuthResult = { id: string; email: string; token: string };
 
 /** POSTs to /auth/<path> with a timeout; throws user-facing errors on network failure. */
 async function postAuth(
-  path: "login" | "register",
+  path: "login" | "register" | "google",
   payload: object,
 ): Promise<Response> {
   const controller = new AbortController();
@@ -133,9 +136,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [startSession, signIn],
   );
 
+  const signInWithGoogle = useCallback(async () => {
+    // null = the user closed the account picker; not an error.
+    const idToken = await getGoogleIdToken();
+    if (!idToken) return;
+
+    // The backend verifies the ID token with Google, then finds or creates the account by its
+    // verified email and answers with the same { id, email, token } as /auth/login.
+    const res = await postAuth("google", { idToken });
+
+    if (!res.ok) {
+      if (res.status === 401) {
+        throw new Error("Google sign-in was rejected. Please try again.");
+      }
+      if (res.status === 400) {
+        throw new Error((await serverMessage(res)) ?? "Google sign-in failed");
+      }
+      throw new Error("Google sign-in failed. Try again later");
+    }
+
+    const body = (await res.json().catch(() => null)) as AuthResult | null;
+    if (!body?.token) {
+      throw new Error("Google sign-in response did not contain a token");
+    }
+
+    await startSession(body.token);
+  }, [startSession]);
+
   const signOut = useCallback(async () => {
     try {
-      await SecureStore.deleteItemAsync(SESSION_KEY);
+      // Also forget the Google account so the picker shows again next time.
+      await Promise.all([
+        SecureStore.deleteItemAsync(SESSION_KEY),
+        signOutOfGoogle(),
+      ]);
     } finally {
       setSession(null);
       // SWR keys like 'phrases' and 'settings' aren't scoped per user.
@@ -144,8 +178,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value = useMemo(
-    () => ({ session, isLoading, signIn, signUp, signOut }),
-    [session, isLoading, signIn, signUp, signOut],
+    () => ({ session, isLoading, signIn, signUp, signInWithGoogle, signOut }),
+    [session, isLoading, signIn, signUp, signInWithGoogle, signOut],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
