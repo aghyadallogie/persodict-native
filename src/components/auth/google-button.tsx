@@ -1,15 +1,17 @@
-import { ThemeColors, useThemedStyles } from '@/lib/use-themed-styles';
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Button } from '@/components/ui/button';
 import Svg, { Path } from 'react-native-svg';
 
 type Props = {
     onPress: () => void;
-    /** Shows a spinner instead of the logo. */
+    /** Shows a spinner and stays pressed in until done, like the form's own submit button. */
     loading?: boolean;
     disabled?: boolean;
 };
 
-/** The four-color Google "G", as in Google's sign-in branding guidelines. */
+const LABEL = 'Continue with Google';
+const FULL_WIDTH = { width: '100%' } as const;
+
+/** The four-color Google "G". */
 function GoogleLogo({ size = 20 }: { size?: number }) {
     return (
         <Svg width={size} height={size} viewBox="0 0 48 48" accessibilityElementsHidden>
@@ -33,52 +35,22 @@ function GoogleLogo({ size = 20 }: { size?: number }) {
     );
 }
 
-/** "Continue with Google" button, styled with Google's light/dark button colors. */
+/**
+ * "Continue with Google": the app's shared `Button` (so it looks and behaves like every other
+ * button) with the Google "G" before the label. While loading it shows a spinner instead, exactly
+ * as the main submit button does.
+ */
 export function GoogleButton({ onPress, loading = false, disabled = false }: Props) {
-    const { styles, colors } = useThemedStyles(createStyles);
-
     return (
-        <Pressable
+        <Button
             onPress={onPress}
-            disabled={disabled || loading}
-            accessibilityRole="button"
-            accessibilityLabel="Continue with Google"
-            accessibilityState={{ disabled: disabled || loading, busy: loading }}
-            style={({ pressed }) => [
-                styles.button,
-                (disabled || loading) && styles.disabled,
-                pressed && styles.pressed,
-            ]}
+            disabled={disabled}
+            loading={loading}
+            style={FULL_WIDTH}
+            accessibilityLabel={LABEL}
+            icon={<GoogleLogo />}
         >
-            <View style={styles.icon}>
-                {loading ? (
-                    <ActivityIndicator size="small" color={colors.googleButtonText} />
-                ) : (
-                    <GoogleLogo />
-                )}
-            </View>
-            <Text style={styles.label}>Continue with Google</Text>
-        </Pressable>
+            {LABEL}
+        </Button>
     );
 }
-
-const createStyles = (colors: ThemeColors) =>
-    StyleSheet.create({
-        button: {
-            // Same height as <Input> so the form lines up.
-            height: 54,
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 12,
-            borderRadius: 10,
-            borderWidth: 1,
-            borderColor: colors.googleButtonBorder,
-            backgroundColor: colors.googleButton,
-            paddingHorizontal: 16,
-        },
-        icon: { width: 20, height: 20, alignItems: 'center', justifyContent: 'center' },
-        label: { color: colors.googleButtonText, fontSize: 16, fontWeight: '500' },
-        disabled: { opacity: 0.6 },
-        pressed: { opacity: 0.85 },
-    });

@@ -1,6 +1,7 @@
 import LoginScreen from '@/app/login';
 import { useAuth } from '@/lib/auth';
 import { act, fireEvent, render, screen } from '@testing-library/react-native';
+import { StyleSheet } from 'react-native';
 
 jest.mock('@/lib/auth', () => ({ useAuth: jest.fn() }));
 jest.mock('@/lib/theme', () => ({
@@ -103,5 +104,48 @@ describe('LoginScreen', () => {
         expect(signInWithGoogle).not.toHaveBeenCalled();
 
         await act(async () => finish());
+    });
+
+    describe('button look while a request is running', () => {
+        const flat = (el: { props: { style?: unknown } }) =>
+            StyleSheet.flatten(el.props.style as never) as {
+                boxShadow?: string;
+                opacity?: number;
+            };
+
+        it('keeps Log In pushed in (not dimmed) until the login finishes, then pops it back up', async () => {
+            let finish!: () => void;
+            signIn.mockReturnValue(new Promise<void>((resolve) => (finish = resolve)));
+            await render(<LoginScreen />);
+            await fillCredentials();
+            expect(flat(loginButton()).boxShadow).not.toMatch(/inset/);
+
+            await fireEvent.press(loginButton());
+
+            expect(flat(loginButton()).boxShadow).toMatch(/^inset /);
+            expect(flat(loginButton()).opacity).toBeUndefined();
+
+            await act(async () => finish());
+
+            expect(flat(loginButton()).boxShadow).not.toMatch(/inset/);
+        });
+
+        it('keeps the Google button pushed in (not dimmed) until Google sign-in finishes', async () => {
+            let finish!: () => void;
+            signInWithGoogle.mockReturnValue(new Promise<void>((resolve) => (finish = resolve)));
+            await render(<LoginScreen />);
+
+            await fireEvent.press(googleButton());
+
+            expect(flat(googleButton()).boxShadow).toMatch(/^inset /);
+            expect(flat(googleButton()).opacity).toBeUndefined();
+            // The other button is simply unavailable meanwhile: dimmed, not pushed in.
+            expect(flat(loginButton()).boxShadow).not.toMatch(/inset/);
+            expect(flat(loginButton()).opacity).toBe(0.5);
+
+            await act(async () => finish());
+
+            expect(flat(googleButton()).boxShadow).not.toMatch(/inset/);
+        });
     });
 });

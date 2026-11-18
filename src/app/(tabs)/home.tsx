@@ -81,12 +81,10 @@ export default function HomeScreen() {
             <Button
               onPress={onSubmit}
               disabled={!canSubmit}
+              loading={isLoading}
+              accessibilityLabel="Translate"
             >
-              {isLoading ? (
-                <ActivityIndicator color={colors.text} />
-              ) : (
-                <Ionicons name="language" size={24} color={colors.text} />
-              )}
+              <Ionicons name="language" size={24} color={colors.text} />
             </Button>
           </View>
 
