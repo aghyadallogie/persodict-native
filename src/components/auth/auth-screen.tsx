@@ -1,5 +1,7 @@
+import { GoogleButton } from '@/components/auth/google-button';
 import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/ui/logo';
+import { isGoogleSignInAvailable } from '@/lib/google-auth';
 import { ThemeColors, useThemedStyles } from '@/lib/use-themed-styles';
 import { ReactNode } from 'react';
 import {
@@ -16,8 +18,12 @@ type Props = {
     title: string;
     /** Button text, also used as its accessibility label. */
     submitLabel: string;
+    /** The form's own submit is running (shows the spinner on the main button). */
     submitting: boolean;
     canSubmit: boolean;
+    /** Google sign-in is running (shows the spinner on the Google button). */
+    googleSubmitting: boolean;
+    onGooglePress: () => void;
     error: string | null;
     onSubmit: () => void;
     /** e.g. "New here?" */
@@ -29,12 +35,14 @@ type Props = {
     children: ReactNode;
 };
 
-/** Shared chrome for the login and register screens: logo, title, fields, error, submit, switch link. */
+/** Shared chrome for the login and register screens: logo, title, fields, error, submit, Google, switch link. */
 export function AuthScreen({
     title,
     submitLabel,
     submitting,
     canSubmit,
+    googleSubmitting,
+    onGooglePress,
     error,
     onSubmit,
     switchPrompt,
@@ -76,6 +84,23 @@ export function AuthScreen({
                     {submitting ? <ActivityIndicator color={colors.primary} /> : submitLabel}
                 </Button>
 
+                {/* Only in builds that contain the Google native module (not Expo Go). */}
+                {isGoogleSignInAvailable() && (
+                    <>
+                        <View style={styles.divider}>
+                            <View style={styles.dividerLine} />
+                            <Text style={styles.dividerText}>or</Text>
+                            <View style={styles.dividerLine} />
+                        </View>
+
+                        <GoogleButton
+                            onPress={onGooglePress}
+                            loading={googleSubmitting}
+                            disabled={submitting}
+                        />
+                    </>
+                )}
+
                 <Text style={styles.switch}>
                     {switchPrompt}{' '}
                     <Text style={styles.switchLink} onPress={onSwitch} accessibilityRole="link">
@@ -102,6 +127,9 @@ const createStyles = (colors: ThemeColors) =>
         fields: { gap: 20, marginBottom: 20 },
         error: { color: colors.danger, marginBottom: 12, textAlign: 'center' },
         button: { width: '100%', marginTop: 26, marginBottom: 12 },
+        divider: { flexDirection: 'row', alignItems: 'center', gap: 12, marginVertical: 12 },
+        dividerLine: { flex: 1, height: StyleSheet.hairlineWidth, backgroundColor: colors.textMuted },
+        dividerText: { color: colors.textMuted, fontSize: 14 },
         switch: { color: colors.textMuted, textAlign: 'center', marginTop: 24, fontSize: 15 },
         switchLink: { color: colors.primary },
     });

@@ -6,21 +6,30 @@ import { router } from 'expo-router';
 import { useState } from 'react';
 
 export default function LoginScreen() {
-    const { signIn } = useAuth();
-    const { submitting, error, run } = useAuthSubmit('Login failed');
+    const { signIn, signInWithGoogle } = useAuth();
+    const { submitting, pending, error, run } = useAuthSubmit('Login failed');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
     const canSubmit = email.trim().length > 0 && password.length > 0 && !submitting;
 
-    const handleLogin = () => run(() => signIn(email, password));
+    // Event handlers return nothing: React Native ignores a returned promise, and `run` already
+    // reports its own errors through `error`.
+    const handleLogin = () => {
+        void run(() => signIn(email, password));
+    };
+    const handleGoogle = () => {
+        void run(() => signInWithGoogle(), 'google');
+    };
 
     return (
         <AuthScreen
             title="Persodict"
             submitLabel="Log In"
-            submitting={submitting}
+            submitting={pending === 'form'}
             canSubmit={canSubmit}
+            googleSubmitting={pending === 'google'}
+            onGooglePress={handleGoogle}
             error={error}
             onSubmit={handleLogin}
             switchPrompt="New here?"

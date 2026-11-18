@@ -8,8 +8,8 @@ import { useState } from 'react';
 const MIN_PASSWORD_LENGTH = 6;
 
 export default function RegisterScreen() {
-    const { signUp } = useAuth();
-    const { submitting, error, setError, run } = useAuthSubmit('Sign up failed');
+    const { signUp, signInWithGoogle } = useAuth();
+    const { submitting, pending, error, setError, run } = useAuthSubmit('Sign up failed');
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -28,15 +28,21 @@ export default function RegisterScreen() {
             return;
         }
 
-        return run(() => signUp(email, password, name));
+        void run(() => signUp(email, password, name));
+    };
+
+    const handleGoogle = () => {
+        void run(() => signInWithGoogle(), 'google');
     };
 
     return (
         <AuthScreen
             title="Create account"
             submitLabel="Create Account"
-            submitting={submitting}
+            submitting={pending === 'form'}
             canSubmit={canSubmit}
+            googleSubmitting={pending === 'google'}
+            onGooglePress={handleGoogle}
             error={error}
             onSubmit={handleRegister}
             switchPrompt="Already have an account?"

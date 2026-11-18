@@ -12,6 +12,10 @@ export const Colors = {
         danger: '#DC2626',
         success: '#16A34A',
         white: '#FFFFFF',
+        // Google's branding guidelines: light and dark variants of the sign-in button.
+        googleButton: '#FFFFFF',
+        googleButtonBorder: '#747775',
+        googleButtonText: '#1F1F1F',
     },
     dark: {
         background: '#1c1d1dff',
@@ -28,5 +32,8 @@ export const Colors = {
         danger: '#DC2626',
         success: '#16A34A',
         white: '#FFFFFF',
+        googleButton: '#131314',
+        googleButtonBorder: '#8E918F',
+        googleButtonText: '#E3E3E3',
     },
 };

@@ -15,6 +15,7 @@ jest.mock('@/components/ui/logo', () => ({ Logo: () => null }));
 jest.mock('expo-router', () => ({ router: { replace: jest.fn() } }));
 
 const signUp = jest.fn();
+const signInWithGoogle = jest.fn();
 
 async function fill(placeholder: string, value: string) {
     await fireEvent.changeText(screen.getByPlaceholderText(placeholder), value);
@@ -25,7 +26,9 @@ const submitButton = () => screen.getByRole('button', { name: 'Create Account' }
 beforeEach(() => {
     signUp.mockReset();
     signUp.mockResolvedValue(undefined);
-    (useAuth as jest.Mock).mockReturnValue({ signUp });
+    signInWithGoogle.mockReset();
+    signInWithGoogle.mockResolvedValue(undefined);
+    (useAuth as jest.Mock).mockReturnValue({ signUp, signInWithGoogle });
 });
 
 describe('RegisterScreen', () => {
@@ -102,5 +105,25 @@ describe('RegisterScreen', () => {
 
         expect(screen.queryByText('Passwords do not match')).toBeNull();
         expect(signUp).toHaveBeenCalledTimes(1);
+    });
+
+    it('offers Google sign-up, which skips the form validation', async () => {
+        await render(<RegisterScreen />);
+        await fill('Password', '123'); // would fail the length check if the form were submitted
+
+        await fireEvent.press(screen.getByRole('button', { name: 'Continue with Google' }));
+
+        expect(signInWithGoogle).toHaveBeenCalledTimes(1);
+        expect(signUp).not.toHaveBeenCalled();
+        expect(screen.queryByText('Password must be at least 6 characters')).toBeNull();
+    });
+
+    it('shows the error when Google sign-up fails', async () => {
+        signInWithGoogle.mockRejectedValue(new Error('Email not verified'));
+        await render(<RegisterScreen />);
+
+        await fireEvent.press(screen.getByRole('button', { name: 'Continue with Google' }));
+
+        expect(await screen.findByText('Email not verified')).toBeTruthy();
     });
 });
